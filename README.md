@@ -1,7 +1,11 @@
 # Avamar_backup_consumption
 *Bash script to add feature of giving usage quota to tenants, checking it, and sending emails about consumption*
 
-This is from the production environment, I just changed the tenants names and replaced emails with fake ones.
+# DISCLAIMER #
+This script works in production environment. You're free to use it according to the GNU license. The script is executed as admin, it calls psql to query database, so it is powerfull tool! GNU v3 states that you accept all liability for usage, but I will emphasize it:
+
+Read it carefully and check if it suits your environment. I accept no damage that may be done to your data. The script works fine in my environment (Avamar 18), but if you decide to use it in yours, you accept all liability for using it and for any damage that may come as result of the usage. I am just giving it to anyone whom it may help in solving data measurement and reporting in Avamar.
+*REMEMBER: responsibility for the system is yours and by using these scripts, you are accepting the sole responsibility. Also, you are accepting the whole liability that any alteration of the script by you, and damage that you may cause to your system by doing that.*
 
 ## Background ##
 Avamar is a great system for BaaS and works great in our production environment. It just lacks the option to charge customers per certain amounts of backup used.
@@ -33,6 +37,13 @@ then copy those 3 files there and add execute perission:
 `chmod ugo+x avamar_quotas*.sh`
 
 and you're set to go. You can execute individual scripts or add crontab to admin user like in the samples.
+
+**Just don't forget to edit `avamar_tenants.csv` and replace tenant1, etc with your real tenant names, otherwise the script will not find any clients.**
+
+You can run script interactively, it will display some basic info and you can check if it found the tenants and the consumption.
+
+Or you can run it via cron, like below.
+
 For daily script execute as root:
 
 `crontab -u admin -e`
