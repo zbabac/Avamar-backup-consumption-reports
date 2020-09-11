@@ -50,7 +50,7 @@ htmlwarning=`cat <<EOT
 
 htmlfooter=` cat << EOT
 Assigned backup quota is $quote GB.<br>
-<b>Current month usage $racun GB.</b><br>
+<b>Current month usage $billed GB.</b><br>
   <footer>
   <p>Sent by some_name</p>
   <p>Contact information: <a href="mailto:some@somedomain.com">
@@ -125,49 +125,45 @@ psql -p 5555 mcdb -t -A -F"," -c "select client_name,max(bytes_protected),max(by
 
 # Sum of all backups from DB is stored in result.csv
 # v2 read only $3
-# I used some funny serbian names for temp vars, PERA, MIKA
-# the rest means:
-# ukupno_bekap - total backup
-# KLIJENT - client
-# zbir - sum - it is total but converted into float
+
 sum=0
-PERA=0
-ukupno_bekap=0
-for i in `cat result.csv`; do MIKA=`echo $i | awk -F, '{print $3}'`; PERA=`echo $i | awk -F, 'BEGIN { miko="'$MIKA'" } {pero="'$PERA'"}{pero+=miko}END{print pero}'` ; KLIJENT=`echo $i | awk -F, '{print $2}'`; ukupno_bekap=`echo $i | awk -F, 'BEGIN { klijent="'$KLIJENT'" } {ukupno="'$ukupno_bekap'"}{ukupno+=klijent}END{print ukupno}'` ; done;
-# zbir converted to float with 2 decimal points
-zbir=`bc -l <<< "scale=3; $PERA/1073741824"`
-ukupno_bekap=`bc -l <<< "scale=3; $ukupno_bekap/1073741824"`
-echo "Scanned $zbir GB"
-echo "Total stored in backup $ukupno_bekap GB"
+TEMP2=0
+total_backup=0
+for i in `cat result.csv`; do TEMP1=`echo $i | awk -F, '{print $3}'`; TEMP2=`echo $i | awk -F, 'BEGIN { tmp1="'$TEMP1'" } {tmp2="'$TEMP2'"}{tmp2+=tmp1}END{print tmp2}'` ; CLIENT=`echo $i | awk -F, '{print $2}'`; total_backup=`echo $i | awk -F, 'BEGIN { client1="'$CLIENT'" } {total1="'$total_backup'"}{total1+=client1}END{print total1}'` ; done;
+# sum_float converted to float with 2 decimal points
+sum_float=`bc -l <<< "scale=3; $TEMP2/1073741824"`
+total_backup=`bc -l <<< "scale=3; $total_backup/1073741824"`
+echo "Scanned $sum_float GB"
+echo "Total stored in backup $total_backup GB"
 
-# compare zbir and quote as float - bash supports only int
-# IF veci=1 THEN zbir LT quote - quota exceeded!
-veci1=`echo $ukupno_bekap'>'$quote | bc -l`
-veci2=`echo $zbir'>'$quote | bc -l`
-veci3=`echo $zbir'>'$ukupno_bekap | bc -l`
+# compare sum_float and quote as float - bash supports only int
+# IF compared=1 THEN sum_float LT quote - quota exceeded!
+compared1=`echo $total_backup'>'$quote | bc -l`
+compared2=`echo $sum_float'>'$quote | bc -l`
+compared3=`echo $sum_float'>'$total_backup | bc -l`
 
-if [ $veci3 -eq 1 ]; then
-   racun=$zbir
+if [ $compared3 -eq 1 ]; then
+   billed=$sum_float
 else 
-   racun=$ukupno_bekap
+   billed=$total_backup
 fi
-veci_warn=`echo $racun'>'$warn_level | bc -l`
+compared_warn=`echo $billed'>'$warn_level | bc -l`
 
 create_html
 
 
-if [[ $veci1 -eq 1 || $veci2 -eq 1 ]]; then
+if [[ $compared1 -eq 1 || $compared2 -eq 1 ]]; then
   mail=$htmlheader$table$htmlquotaspent$htmlfooter
 else
-  if [[ $veci_warn -eq 1 ]]; then
+  if [[ $compared_warn -eq 1 ]]; then
      mail=$htmlheader$table$htmlwarning$htmlfooter
   else
      mail=$htmlheader$table$htmlfooter
   fi
 fi
 
-if [ $veci_warn -eq 1 ]; then
-	echo Saljem mejl ako je potrosnja preko 80%
+if [ $compared_warn -eq 1 ]; then
+	echo Sending email if consumption over 80%
 	send_mail
 	send_mail_ict
 fi
