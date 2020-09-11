@@ -25,6 +25,30 @@ The script is written in bash, with usage of AWK for parsing the data fetched by
 
 **If you want some other model, then you can use some other value from this table. The principle should be the same.**
 
+## How does it work ##
+
+The scripts create some HTML formatting for sending reports via email.
+
+It uses the external file `avamar_tenants.csv` in which one defines tenant names and assigns quotas for each one.
+
+The main thing that you may change and play with is the psql query to table v_activities_2. You may use some other table if you're familiar with the Avamar DB data structure.
+
+The script will read avamar_tenants.csv and check data for each given line.
+
+In my case, I sum the recorded_bytes for each client machine registered for backup for each tenant. Bytes will be converted to GB and compared with defined quotas from the file.
+
+If usage is less than 80% then nothing happens, no email is sent.
+If it is >80% and <100% then warning email is sent.
+If > 100% then Alert is sent.
+
+For monthly script there is no point in checking, just report with consumption is sent to the customer.
+
+Email addresses to which those reports are sent are defined in Avamar tenants. When you create domain, you add email of the contact. This email is fetched by mccli and script uses it to send email.
+
+You need to edit email addresses where it is stated From field. You should use one defined in DD configuration for email. These addresses are usually allowed at mail servers as aliases, so it is good idea to use them as you will have clear information who's sending those emails and it will not be treated as spam. Check your DD email config.
+
+Also, other information in email should be reviewed and suited to your needs.
+
 ## Usage ##
 First, create dir in admin home:
 
