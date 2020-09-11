@@ -32,7 +32,7 @@ First, create dir in admin home:
 
 `cd /home/admin/avamar_quotas`
 
-then copy those 3 files there and add execute perission:
+then copy those 3 files there and add execute permission:
 
 `chmod ugo+x avamar_quotas*.sh`
 
