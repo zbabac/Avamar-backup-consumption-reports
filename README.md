@@ -15,10 +15,11 @@ These scripts don't measure the amount of data stored in Avamar and DD. Our tari
 The idea is that we define quotas for each customer, for example this one will buy 30GB of space for backup. We want to check consumption every day, if it passes 80% of the defined quota, we send warning emeil.
 If they pass defined quota, we send Alert email. If usage is lower we don't spam them, so we don't send anything.
 
-Also, at the endo of the month, we send monthly report, which is the same as the first script, it's just unconditional, we send it at every run.
+Also, at the end of the month, we send monthly report, which is the same as the first script, it's just unconditional, we send it at every run.
 
 The script is written in bash, with usage of AWK for parsing the data fetched by psql from the table v_activities_2. I used the column bytes_protected.
-If you want some other model, then you can use some other value from this table. The principle should be the same.
+
+**If you want some other model, then you can use some other value from this table. The principle should be the same.**
 
 ## Usage ##
 First, create dir in admin home:
